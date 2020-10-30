@@ -25,19 +25,19 @@ namespace AwesomeGym.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult GetById(int id)
         {
             var unidades = _awesomeGymDbContext.Unidades.SingleOrDefault(u => u.Id == id);
 
-            if(unidades == null)
+            if (unidades == null)
             {
                 return NotFound();
             }
-            return Ok(unidades);
+            return CreatedAtAction(nameof(GetById), unidades, new { id = unidades.Id });
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]Unidade unidade)
+        public IActionResult Post([FromBody] Unidade unidade)
         {
             if (!ModelState.IsValid)
                 return NotFound();
@@ -49,9 +49,17 @@ namespace AwesomeGym.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id)
+        public IActionResult Put(int id, [FromBody] Unidade unidade)
         {
-            return Ok();
+            if (!_awesomeGymDbContext.Unidades.Any(a => a.Id == id))
+            {
+                return NotFound();
+            }
+
+            _awesomeGymDbContext.Unidades.Update(unidade);
+            _awesomeGymDbContext.SaveChanges();
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -64,7 +72,7 @@ namespace AwesomeGym.API.Controllers
                 return NotFound();
             }
 
-            _awesomeGymDbContext.Entry(unidades).State = EntityState.Deleted;
+            _awesomeGymDbContext.Remove(unidades);
             _awesomeGymDbContext.SaveChanges();
 
             return NoContent();

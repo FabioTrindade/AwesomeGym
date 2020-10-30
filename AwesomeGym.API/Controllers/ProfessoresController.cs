@@ -25,7 +25,7 @@ namespace AwesomeGym.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult GetById(int id)
         {
             var professores = _awesomeGymDbContext.Professores.SingleOrDefault(u => u.Id == id);
 
@@ -42,13 +42,21 @@ namespace AwesomeGym.API.Controllers
             _awesomeGymDbContext.Professores.Add(professor);
             _awesomeGymDbContext.SaveChanges();
 
-            return NoContent();
+            return CreatedAtAction(nameof(GetById), professor, new { id = professor.Id });
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id)
+        public IActionResult Put(int id, [FromBody] Professor professor)
         {
-            return Ok();
+            if (!_awesomeGymDbContext.Professores.Any(a => a.Id == id))
+            {
+                return NotFound();
+            }
+
+            _awesomeGymDbContext.Professores.Update(professor);
+            _awesomeGymDbContext.SaveChanges();
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -61,7 +69,7 @@ namespace AwesomeGym.API.Controllers
                 return NotFound();
             }
 
-            _awesomeGymDbContext.Entry(professor).State = EntityState.Deleted;
+            _awesomeGymDbContext.Remove(professor);
             _awesomeGymDbContext.SaveChanges();
 
             return NoContent();
